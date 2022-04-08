@@ -2,12 +2,14 @@ package telran.java41.person.service;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.AllArgsConstructor;
 import telran.java41.person.dao.PersonRepository;
 import telran.java41.person.dto.AddressDto;
 import telran.java41.person.dto.PersonDto;
 import telran.java41.person.dto.exceptions.EntityNotFoundException;
+import telran.java41.person.model.Address;
 import telran.java41.person.model.Person;
 
 @Service
@@ -18,6 +20,7 @@ public class PersonServiceImpl implements PersonService {
 	ModelMapper modelMapper;
 
 	@Override
+	@Transactional
 	public boolean addPerson(PersonDto personDto) {
 		if(personRepository.existsById(personDto.getId())) {
 			return false;
@@ -33,21 +36,27 @@ public class PersonServiceImpl implements PersonService {
 	}
 
 	@Override
+	@Transactional
 	public PersonDto removePerson(Integer id) {
-		// TODO Auto-generated method stub
-		return null;
+		Person person = personRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+		personRepository.delete(person);
+		return modelMapper.map(person, PersonDto.class);
 	}
 
 	@Override
+	@Transactional
 	public PersonDto updatePersonName(Integer id, String name) {
-		// TODO Auto-generated method stub
-		return null;
+		Person person = personRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+		person.setName(name);
+		return modelMapper.map(person, PersonDto.class);
 	}
 
 	@Override
+	@Transactional
 	public PersonDto updatePersonAddress(Integer id, AddressDto addressDto) {
-		// TODO Auto-generated method stub
-		return null;
+		Person person = personRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+		person.setAddress(modelMapper.map(addressDto, Address.class));
+		return modelMapper.map(person, PersonDto.class);
 	}
 
 }
